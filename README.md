@@ -11,7 +11,7 @@ If you do happen to find it works with your own system please let me know and if
 4. Should you have an issue, read the [FAQ](https://arduino.github.io/arduino-cli/latest/FAQ/) page
 
 # How to Run the Utility:
-1. Open the script and edit line 29 with your Arduino_CLI Path
+1. Open the script and edit line 29 `ARDUINO_CLI=<place you arduino_cli path here>` with your Arduino_CLI Path
 2. Make sure the script is exucatable by running `chmod u+x <script name>`
 3. to run: `./<scriptname> -c <Amount of Ducks to Flash> -f <Your Master .INO>`
 4. if you run into issues you can run the `./<scriptname> --help for guidance`
