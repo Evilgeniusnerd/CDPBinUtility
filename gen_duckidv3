@@ -1,0 +1,165 @@
+#!/bin/bash
+#This script is a utility tool for creating binary (.bin) files in a Flash !
+#It is coded to be used with the Project Owl ClusterDuck-Prototcol (CDP)
+#
+# By: Zachary Neuhaus & David Mandala Copyright 2021 all reights reserved
+#     except as licensed by the GPL V2.0 (only) license.
+#
+# Version 0.0.06 2021-26-01
+
+#=====Notes=======
+# save this script as any name you want.
+# then call it ./gen_duckid -c 10 -f <>
+# and it will make 10 new .bins with random duck id's
+#=====Notes=========
+
+#Here for Security Measures
+GETOPT=/usr/bin/getopt
+CAT=/usr/bin/cat
+TR=/usr/bin/tr
+HEAD=/usr/bin/head
+SED=/usr/bin/sed
+ECHO=/usr/bin/echo
+MV=/usr/bin/mv
+RM=/usr/bin/rm
+MKDIR=/usr/bin/mkdir
+
+# Fill this with the location of where on your machine you have arduino_cli installed
+# Can be found via terminal command: which arduino-cli --> copy that path it prints out and put it below
+ARDUINO_CLI=<place you arduino_cli path here>
+
+
+SCRIPT_VERSION="0.6"
+# Length of the random duck id
+STR_LENGTH=8
+
+COUNT=0
+FILE_NAME_COUNT=0
+
+#========Checks & Error Handling ======
+exit_on_error () {
+  $ECHO -e "\n$1\n"
+  exit -1
+}
+
+display_help () {
+  $ECHO -e "\n$1 version is $SCRIPT_VERSION\n"
+  $ECHO -e "usage\t$1\t-h -H -F -f -C -c or"
+  $ECHO -e "\t$1\t--help --Help --Count --count"
+  $ECHO -e "\t$1\t--file_name --File_name"
+  $ECHO -e "You must supply a file name and how many binaries you need."
+  exit 0
+}
+
+check_application () {
+  if [ ! -x $1 ]; then
+    exit_on_error "\n$1 must be installed for this script to work.\nI looked for $1 and did not find it.\n"
+  fi
+  return 0
+}
+
+check_file () {
+  if [ ! -f $1 ]; then
+    exit_on_error "\n$1 must be present for this script to work.\nI looked for $1 and did not find it.\n"
+  fi
+  return 0
+}
+
+#========Checks & Error Handling ======
+
+#===== script starts here===
+check_application $GETOPT
+check_application $CAT
+check_application $TR
+check_application $HEAD
+check_application $SED
+check_application $ECHO
+check_application $MV
+check_application $RM
+check_application $MKDIR
+check_application $ARDUINO_CLI
+
+# Execute getopt on the arguments passed to this program, identified by the 
+# special character $@
+PARSED_OPTIONS=$(getopt -n "$0" -o hHvVf:f:C:c:  --long \
+ "help,Help,version,Version,file_name:,File_name:,count:,Count:" \
+ -- "$@")
+ 
+#Bad arguments, something has gone wrong with the getopt command.
+if [ $? -ne 0 ]; then
+  exit_on_error "\nSomething has gone wrong with the gnu getopt command. Exiting."
+fi
+ 
+# A little magic, necessary when using getopt.
+eval set -- "$PARSED_OPTIONS"
+ 
+# Now goes through all the options with a case and using shift to analyse 1 argument at a time.
+#$1 identifies the first argument, and when we use shift we discard the first argument, so $2 becomes $1 and g
+while true;
+do
+  case "$1" in
+
+    -h|-H|--help|--Help)
+      display_help ${0##*/}
+      shift;;
+
+    -v|-V|--version|--Version)
+      $ECHO -e "\n${0##*/} version is $SCRIPT_VERSION\n"
+      exit 0
+      shift;;
+
+    -c|-C|--Count|--count)
+      if [ -n "$2" ]; then
+        if [ "$COUNT" = 0 ]; then
+          COUNT=("$2")
+        else
+          exit_on_error "Can only supply how many files to make once."
+        fi
+      fi
+      shift 2;;
+
+    -f|-F|--file_name|--File_name)
+      if [ -n "$2" ]; then
+        if [ "$FILE_NAME_COUNT" = 0 ]; then
+          ((FILE_NAME_COUNT+=1))
+          FILE_NAME=("$2")
+          check_file $FILE_NAME
+        else
+          exit_on_error "Can only supply one file name."
+        fi
+      fi
+      shift 2;;
+
+    --)
+      shift
+      break;;
+  esac
+done
+
+if [ $COUNT -eq 0 ]; then
+    display_help
+fi
+
+$ECHO -n  "Flashing $COUNT Ducks." 
+LOOP_COUNT=1
+while [  $LOOP_COUNT -le $COUNT ] 
+    do
+        NEW_UUID=`$TR -dc A-Za-z0-9 </dev/urandom | $HEAD -c $STR_LENGTH`
+        $CAT $FILE_NAME | $SED "s/DUCKLINK/$NEW_UUID/" > $NEW_UUID.ino
+        #Make a New Folder to store the new INO
+        $MKDIR $NEW_UUID
+        #MV the INO to the new folder
+        $MV $NEW_UUID.ino $NEW_UUID
+        #Now Compile each ino to get the bin
+        $ARDUINO_CLI compile -e --fqbn esp32:esp32:t-beam $NEW_UUID/$NEW_UUID.ino
+        # Now rename to get rid of .ino.bin and move the /bins folder.
+        $MV $NEW_UUID/build/esp32.esp32.t-beam/$NEW_UUID.ino.bin $NEW_UUID.bin 
+        $MV $NEW_UUID.bin bins/
+        # Now remove the ino folders we made earlier we don't need them any more.
+        $RM -r $NEW_UUID
+        # Now loop and do it again.
+        (( LOOP_COUNT+=1 ))
+    done
+
+$ECHO "All $COUNT files created"
+##========Script Ends Here ======
