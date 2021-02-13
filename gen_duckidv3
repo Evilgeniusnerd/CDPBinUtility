@@ -158,7 +158,7 @@ while [  $LOOP_COUNT -le $COUNT ]
         # Now remove the ino folders we made earlier we don't need them any more.
         $RM -r $NEW_UUID
         # Take a nap before looping through again
-        sleep 4
+        sleep 2
         # Now loop and do it again.
         (( LOOP_COUNT+=1 ))
     done
