@@ -26,7 +26,7 @@ MKDIR=/usr/bin/mkdir
 
 # Fill this with the location of where on your machine you have arduino_cli installed
 # Can be found via terminal command: which arduino-cli --> copy that path it prints out and put it below
-ARDUINO_CLI=<place you arduino_cli path here>
+ARDUINO_CLI=/home/devbox/bin/arduino-cli
 
 
 SCRIPT_VERSION="0.6"
@@ -157,6 +157,8 @@ while [  $LOOP_COUNT -le $COUNT ]
         $MV $NEW_UUID.bin bins/
         # Now remove the ino folders we made earlier we don't need them any more.
         $RM -r $NEW_UUID
+        # Take a nap before looping through again
+        sleep 4
         # Now loop and do it again.
         (( LOOP_COUNT+=1 ))
     done
