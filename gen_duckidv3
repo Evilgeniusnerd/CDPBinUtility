@@ -26,7 +26,7 @@ MKDIR=/usr/bin/mkdir
 
 # Fill this with the location of where on your machine you have arduino_cli installed
 # Can be found via terminal command: which arduino-cli --> copy that path it prints out and put it below
-ARDUINO_CLI=/home/devbox/bin/arduino-cli
+ARDUINO_CLI= <insert_your_cli_path_here>
 
 
 SCRIPT_VERSION="0.6"
@@ -145,7 +145,7 @@ LOOP_COUNT=1
 while [  $LOOP_COUNT -le $COUNT ] 
     do
         NEW_UUID=`$TR -dc A-Za-z0-9 </dev/urandom | $HEAD -c $STR_LENGTH`
-        $CAT $FILE_NAME | $SED "s/DUCKLINK/$NEW_UUID/" > $NEW_UUID.ino
+        $CAT $FILE_NAME | $SED "s/DUCK0001/$NEW_UUID/" > $NEW_UUID.ino
         #Make a New Folder to store the new INO
         $MKDIR $NEW_UUID
         #MV the INO to the new folder

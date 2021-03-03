@@ -23,15 +23,13 @@ const int INTERVAL_MS = 30000;
 int counter = 1;
 
 void setup() {
-  // The Device ID must be unique and 8 bytes long. Typically the ID is stored
-  // in a secure nvram, or provided to the duck during provisioning/registration
-  const std::string DUCK_ID("DUCKLINK");
+  // We are using a hardcoded device id here, but it should be retrieved or
+  // given during the device provisioning then converted to a byte vector to
+  // setup the duck NOTE: The Device ID must be exactly 8 bytes otherwise it
+  // will get rejected
+  std::string deviceId("DUCK0001");
   std::vector<byte> devId;
-  devId.insert(devId.end(), DUCK_ID.begin(), DUCK_ID.end());
-  
-  //std::vector<byte> devId = {'D', 'U', 'C', 'K', 'L', 'I', 'N', 'K'};
-
-  // Use the default setup provided by the SDK
+  devId.insert(devId.end(), deviceId.begin(), deviceId.end());
   duck.setupWithDefaults(devId);
 
   // Initialize the timer. The timer thread runs separately from the main loop
